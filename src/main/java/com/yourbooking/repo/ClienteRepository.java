@@ -11,5 +11,7 @@ public interface ClienteRepository extends CrudRepository<Cliente, Long> {
 
     @Query("select c from Cliente c where c.email=:email and c.pwd = :pwd")
     public Cliente findByEmailAndPwd(String email, String pwd);
+
+
 }
 

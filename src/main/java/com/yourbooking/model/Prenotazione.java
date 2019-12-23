@@ -1,6 +1,8 @@
 package com.yourbooking.model;
 
 import javax.persistence.*;
+import java.sql.Date;
+import java.time.LocalDate;
 
 @Entity
 public class Prenotazione {
@@ -17,4 +19,54 @@ public class Prenotazione {
     Cliente cliente;
     @ManyToOne
     NegozioServizio servizio;
+
+    LocalDate data;
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
+    }
+
+    public Operatore getOperatore() {
+        return operatore;
+    }
+
+    public void setOperatore(Operatore operatore) {
+        this.operatore = operatore;
+    }
+
+    public Cliente getCliente() {
+        return cliente;
+    }
+
+    public void setCliente(Cliente cliente) {
+        this.cliente = cliente;
+    }
+
+    public NegozioServizio getServizio() {
+        return servizio;
+    }
+
+    public void setServizio(NegozioServizio servizio) {
+        this.servizio = servizio;
+    }
+
+    public LocalDate getData() {
+        return data;
+    }
+
+    public void setData(LocalDate data) {
+        this.data = data;
+    }
 }

@@ -85,4 +85,12 @@ public class Cliente {
 
         return cliente;
     }
+
+    public List<Negozio> getPreferiti() {
+        return preferiti;
+    }
+
+    public void setPreferiti(List<Negozio> preferiti) {
+        this.preferiti = preferiti;
+    }
 }
