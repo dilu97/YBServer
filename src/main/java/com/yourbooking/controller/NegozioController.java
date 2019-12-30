@@ -10,14 +10,17 @@ import com.yourbooking.repo.NegozioRepository;
 import com.yourbooking.repo.PrenotazioneRepository;
 import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true", allowedHeaders = "*")
 @RestController
 //@RequestMapping("/api")
 public class NegozioController {
@@ -30,6 +33,9 @@ public class NegozioController {
 
 	@Autowired
 	PrenotazioneRepository prenotazioneRepository;
+
+	@Autowired
+	private HttpSession httpSession;
 
 
 	@GetMapping("/negozi")
@@ -60,7 +66,7 @@ public class NegozioController {
 	}
 
 	@PostMapping(value = "/negozi/create")
-	public Negozio postNegozio(@RequestBody Negozio negozio) {
+	public Negozio postNegozio(@RequestBody Negozio negozio, HttpSession session) {
 		Negozio _negozio = new Negozio();
 		_negozio.setDescrizione(negozio.getDescrizione());
 		_negozio.setEmail(negozio.getEmail());
@@ -70,7 +76,7 @@ public class NegozioController {
 		_negozio.setOperatori(negozio.getOperatori());
 		_negozio.setSito(negozio.getSito());
 		_negozio.setTelefono(negozio.getTelefono());
-
+		session.setAttribute("id", _negozio.getId());
 		return repository.save(_negozio);
 	}
 
@@ -84,13 +90,19 @@ public class NegozioController {
 		JSONObject ret = new JSONObject();
 		ret.put("response", res);
 
+		if(n != null) {
+			ret.put("shop", n);
+			httpSession.setAttribute("id", n.getId());
+			System.out.println("Login session: " + httpSession.getId());
+		}
 		return ret;
 	}
 
 	//numero : prenotazione attive, passate, clienti, operatori
 	@PostMapping(value = "/api/negozio/stats")
-	public JSONObject getStats(@RequestBody JsonNode data) {
-		long id = Long.valueOf(data.get("id").asText());
+	public JSONObject getStats() {
+		System.out.println("getStats session: " + httpSession.getId());
+		long id = Long.valueOf(httpSession.getAttribute("id").toString());
 
 		LocalDate now = LocalDate.now();
 		List<Prenotazione> listPrenotazioni = prenotazioneRepository.findAllPrenotazioniAttiveByNegozio(repository.findById(id).get(0));
@@ -101,11 +113,10 @@ public class NegozioController {
 		}
 
 		JSONObject ret = new JSONObject();
-		ret.put("attive", attive);
-		ret.put("passate", passate);
-		ret.put("clienti", repository.getNumeroClientiPreferiti(id));
-		ret.put("operatori", repository.getNumeroOperatori(id));
-
+		ret.put("active", attive);
+		ret.put("completed", passate);
+		ret.put("customers", repository.getNumeroClientiPreferiti(id));
+		ret.put("operators", repository.getNumeroOperatori(id));
 		return ret;
 	}
 

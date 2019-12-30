@@ -86,6 +86,11 @@ public class Cliente {
         return cliente;
     }
 
+    public long getId() {
+        return id;
+    }
+
+
     public List<Negozio> getPreferiti() {
         return preferiti;
     }

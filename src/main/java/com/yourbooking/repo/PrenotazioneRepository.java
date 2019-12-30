@@ -1,6 +1,7 @@
 package com.yourbooking.repo;
 
 import com.yourbooking.model.Categoria;
+import com.yourbooking.model.Cliente;
 import com.yourbooking.model.Negozio;
 import com.yourbooking.model.Prenotazione;
 import org.springframework.data.jpa.repository.Query;
@@ -18,5 +19,8 @@ public interface PrenotazioneRepository extends CrudRepository<Prenotazione, Lon
     public List<Prenotazione> findAllPrenotazioniAttiveByNegozio(Negozio n);
 
     public List<Prenotazione> findAllById(long id);
+
+    @Query("SELECT p FROM Prenotazione p WHERE p.cliente=:c ORDER BY p.data ASC")
+    public List<Prenotazione> findAllByCliente(Cliente c);
 }
 

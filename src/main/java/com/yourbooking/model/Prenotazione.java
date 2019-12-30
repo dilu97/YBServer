@@ -1,7 +1,6 @@
 package com.yourbooking.model;
 
 import javax.persistence.*;
-import java.sql.Date;
 import java.time.LocalDate;
 
 @Entity
@@ -21,6 +20,9 @@ public class Prenotazione {
     NegozioServizio servizio;
 
     LocalDate data;
+
+    @Enumerated(EnumType.STRING)
+    Status status;
 
     public long getId() {
         return id;
@@ -69,4 +71,17 @@ public class Prenotazione {
     public void setData(LocalDate data) {
         this.data = data;
     }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    public enum Status {
+        ABORT, ERROR;
+    }
 }
+

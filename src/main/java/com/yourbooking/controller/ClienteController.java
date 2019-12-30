@@ -6,9 +6,11 @@ import com.fasterxml.jackson.databind.util.JSONPObject;
 import com.google.gson.Gson;
 import com.yourbooking.model.Citta;
 import com.yourbooking.model.Cliente;
+import com.yourbooking.model.Prenotazione;
 import com.yourbooking.repo.CittaRepository;
 import com.yourbooking.repo.ClienteRepository;
 
+import com.yourbooking.repo.PrenotazioneRepository;
 import net.minidev.json.JSONObject;
 
 import net.minidev.json.parser.JSONParser;
@@ -20,11 +22,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true", allowedHeaders = "*")
 @RestController
 public class ClienteController {
 
@@ -41,6 +46,12 @@ public class ClienteController {
 	@Autowired
 	CittaRepository cittaRepository;
 
+	@Autowired
+	PrenotazioneRepository prenotazioneRepository;
+
+	@Autowired
+	private HttpSession httpSession;
+
 	@PostMapping(value = "/api/user/login")
 	public JSONObject login(@RequestBody JsonNode credenziali) {
 		String email = credenziali.get("email").asText();
@@ -50,6 +61,38 @@ public class ClienteController {
 		if(c != null) res = "ok";
 		JSONObject ret = new JSONObject();
 		ret.put("response", res);
+
+		if(c != null)
+			httpSession.setAttribute("id", c.getId());
+
+		return ret;
+	}
+
+	//numero : prenotazione attive, passate, prossima prenotazione, negozi prefe
+	@PostMapping(value = "/api/user/stats")
+	public JSONObject getStats() {
+		//long id = Long.valueOf(data.get("id").asText());
+		long id = Long.valueOf(httpSession.getAttribute("id").toString());
+
+		LocalDate now = LocalDate.now();
+		List<Prenotazione> listPrenotazioni = prenotazioneRepository.findAllByCliente(repository.findById(id));
+		int attive = 0, passate = 0;
+		Prenotazione next = null;
+		for(Prenotazione p : listPrenotazioni){
+			if(p.getStatus() != Prenotazione.Status.ABORT && p.getStatus() != Prenotazione.Status.ERROR) {
+				if (p.getData().compareTo(now) > 0) {
+					if(next == null)next = p;
+					attive++;
+				}
+				else passate++;
+			}
+		}
+
+		JSONObject ret = new JSONObject();
+		ret.put("active", attive);
+		ret.put("completed", passate);
+		if(next!=null) ret.put("next", next); else ret.put("next", "null");
+		ret.put("prefered", repository.getNumeroNegoziPreferiti(id));
 		return ret;
 	}
 
